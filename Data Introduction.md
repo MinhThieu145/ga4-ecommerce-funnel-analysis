@@ -1,4 +1,4 @@
-## Executive Summary
+## Data Introduction
 
 This analysis looks at **108,401 sessions** from the GA4 sample ecommerce dataset (**Nov 1–30, 2020**) to understand:
 
