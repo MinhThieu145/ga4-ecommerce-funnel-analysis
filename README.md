@@ -2,6 +2,23 @@
 
 A comprehensive SQL-based funnel analysis using BigQuery on the GA4 sample ecommerce dataset, revealing dual-path revenue models and sequential conversion patterns.
 
+## 📦 About the Data
+
+**Dataset:** [GA4 Obfuscated Sample Ecommerce](https://console.cloud.google.com/marketplace/product/obfuscated-ga360-data/obfuscated-ga4-ecommerce-data-set) (BigQuery Public Dataset)
+
+**Source Website:** [Google Merchandise Store](https://www.googlemerchandisestore.com/) - Google-branded apparel and merchandise
+
+**BigQuery Table:** `bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_*`
+
+**Analysis Period:** November 1-30, 2020 (30 days)
+
+**Data Format:** GA4 event-level export (each row = one event)
+
+**Access:** Free to query with a Google Cloud account - no download required
+
+> **Note:** This is obfuscated sample data. Some fields (like traffic source) are partially redacted for privacy.
+
+
 ## 🎯 Key Findings
 
 - **Primary Opportunity:** Non-cart checkout abandonment (2,538 sessions, 68% drop rate) represents ~$20K monthly revenue opportunity
@@ -47,11 +64,6 @@ This analysis examines 108,401 sessions from November 2020 to understand:
 - Google Cloud account with BigQuery access
 - Python 3.8+ with pandas, matplotlib, seaborn
 
-**Steps:**
-1. Clone this repository
-2. Open `Step 1 - EDA.ipynb` to explore the dataset
-3. Run `Step 2 - Analysis.ipynb` for sequential funnel analysis
-4. Execute `Step 3 - Visualization.ipynb` to generate charts
 
 ## 📈 Key Visualizations
 
