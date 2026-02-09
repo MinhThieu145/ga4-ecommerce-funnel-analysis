@@ -4,7 +4,7 @@ A comprehensive SQL-based funnel analysis using BigQuery on the GA4 sample ecomm
 
 ## 📦 About the Data
 
-**Dataset:** [GA4 Obfuscated Sample Ecommerce](https://console.cloud.google.com/marketplace/product/obfuscated-ga360-data/obfuscated-ga4-ecommerce-data-set) (BigQuery Public Dataset)
+- **Dataset:** [GA4 Obfuscated Sample Ecommerce](https://console.cloud.google.com/marketplace/product/obfuscated-ga360-data/obfuscated-ga4-ecommerce-data-set) (BigQuery Public Dataset)
 
 - **Source Website:** [Google Merchandise Store](https://www.googlemerchandisestore.com/) - Google-branded apparel and merchandise
 - **BigQuery Table:** `bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_*`
