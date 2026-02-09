@@ -6,15 +6,11 @@ A comprehensive SQL-based funnel analysis using BigQuery on the GA4 sample ecomm
 
 **Dataset:** [GA4 Obfuscated Sample Ecommerce](https://console.cloud.google.com/marketplace/product/obfuscated-ga360-data/obfuscated-ga4-ecommerce-data-set) (BigQuery Public Dataset)
 
-**Source Website:** [Google Merchandise Store](https://www.googlemerchandisestore.com/) - Google-branded apparel and merchandise
-
-**BigQuery Table:** `bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_*`
-
-**Analysis Period:** November 1-30, 2020 (30 days)
-
-**Data Format:** GA4 event-level export (each row = one event)
-
-**Access:** Free to query with a Google Cloud account - no download required
+- **Source Website:** [Google Merchandise Store](https://www.googlemerchandisestore.com/) - Google-branded apparel and merchandise
+- **BigQuery Table:** `bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_*`
+- **Analysis Period:** November 1-30, 2020 (30 days)
+- **Data Format:** GA4 event-level export (each row = one event)
+- **Access:** Free to query with a Google Cloud account - no download required
 
 > **Note:** This is obfuscated sample data. Some fields (like traffic source) are partially redacted for privacy.
 
