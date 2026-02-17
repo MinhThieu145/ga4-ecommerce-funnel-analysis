@@ -32,7 +32,7 @@ Because of obfuscation, internal consistency is somewhat limited, and this datas
 
 
 
-## **Core Fields (High-Value for Analysis)**
+## **Core Fields**
 
 ### **Event Identification**
 
