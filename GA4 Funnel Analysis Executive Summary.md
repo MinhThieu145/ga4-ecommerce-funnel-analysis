@@ -68,15 +68,16 @@ Working hypothesis to validate next: friction in the fast path (auth/sign-in pro
 
 Path economics shows two purchase families:
 
-* **purchase_non_cart**
-
-  * **73.2%** of transactions
-  * **71.1%** of deduped revenue
-* **purchase_cart_assisted**
-
-  * **26.7%** of transactions
-  * **28.9%** of deduped revenue
-
+* purchase_non_cart
+  * 74.1% of purchase sessions (1,198 out of 1,617)
+  * 71.1% of deduped revenue
+* purchase_cart_assisted
+  * 25.8% of purchase sessions (417 out of 1,617)
+  * 28.9% of deduped revenue
+  
+Note: Transaction counts at the path level are inflated due to transaction_ids 
+appearing across multiple sessions in the obfuscated data. Purchase session counts 
+and revenue shares are reliable.
 Interpretation: most monetization is happening through sessions that do **checkout → purchase** without a cart step. That’s why non-cart checkout abandonment is the top priority.
 
 ![alt text](exported_visualization/chart2_revenue_share.png)

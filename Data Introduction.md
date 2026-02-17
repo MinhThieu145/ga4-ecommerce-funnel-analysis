@@ -5,11 +5,10 @@
 
 This dataset contains GA4 **event-level** data from the Google Merchandise Store (Google-branded ecommerce site), exported to BigQuery as a public sample dataset.
 
-* **Source Website (official reference):** `shop.googlemerchandisestore.com`
+* **Source Website (official reference):** `www.googlemerchandisestore.com`
 * **Dataset:** `bigquery-public-data.ga4_obfuscated_sample_ecommerce`
 * **Date Range:** **2020-11-01 to 2021-01-31** (3 months / 92 days)
 * **Table Pattern:** Daily tables named `events_YYYYMMDD` (for example, `events_20201101`)
-* **Implementation Context:** Web ecommerce implementation + enhanced measurement sample
 
 
 
@@ -19,7 +18,7 @@ GA4 uses an **event-based schema** in BigQuery export. In practice, analysis is 
 
 A single user journey (session start → product view → add to cart → purchase) appears as multiple event records, which must be aggregated for session/funnel analysis.
 
-Key modeling implication: GA4 is **not** session-table-first; you build sessions/funnels from events.
+Key issue: GA4 is **not** session-table-first; need to build sessions/funnels from events.
 
 ## **Obfuscation and Sample Constraints**
 
@@ -44,6 +43,22 @@ Because of obfuscation, internal consistency is somewhat limited, and this datas
 * `event_name` (STRING)
   Event type (e.g., `session_start`, `page_view`, `view_item`, `add_to_cart`, `begin_checkout`, `purchase`, etc.).
 
+### **Event Parameters**
+
+* `event_params` (REPEATED RECORD)
+  Repeated struct containing key-value pairs attached to each event. 
+  This is where session-level context lives — most importantly:
+  * `ga_session_id` (int_value) — session identifier, extracted via UNNEST
+  * `ga_session_number` (int_value) — session count for the user
+  * `page_location`, `page_title`, `source`, `medium`, and other context params
+
+  Extraction pattern:
+```sql
+  (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS ga_session_id
+```
+
+  Note: `ga_session_id` alone is not globally unique — must be concatenated 
+  with `user_pseudo_id` to form a unique session key.
 
 
 ### **User Identification**
@@ -191,27 +206,28 @@ All events with that combination belong to the same session window (subject to G
 
 
 
-## **Known Limitations (Non-Completeness)**
+## **Known Limitation**
 
 1. **Obfuscation artifacts** can affect raw field fidelity (`<Other>`, `NULL`, empty string).
 2. **Traffic-source interpretation depends on scope** (user first-touch vs session/event context).
 3. **Nested/repeated schema** requires careful SQL (`UNNEST`, dedup/session logic).
 4. **Sample dataset behavior is representative but not identical to production property outputs**.
 5. **Not intended as a perfect mirror** of the GA demo account.
+6. **NULL session identifiers**: When users do not consent to cookie tracking, 
+   `user_pseudo_id` and `ga_session_id` may be NULL. These events cannot be 
+   attributed to any session and were excluded from session-level analysis. 
 
-
-```
 | # | field_path | data_type |
 |---|------------|-----------|
 | 1 | user_pseudo_id | STRING |
-| 2 | user_properties.value.string_value | INT64 |
+| 2 | user_properties.value.string_value | STRING |
 | 3 | user_properties.value.set_timestamp_micros | INT64 |
 | 4 | user_properties.value.int_value | INT64 |
-| 5 | user_properties.value.float_value | INT64 |
-| 6 | user_properties.value.double_value | INT64 |
-| 7 | user_properties.value | STRUCT<string_value INT64, int_value INT64, float_value INT64, double_value INT64, set_timestamp_micros INT64> |
-| 8 | user_properties.key | INT64 |
-| 9 | user_properties | ARRAY<STRUCT<key INT64, value STRUCT<string_value INT64, int_value INT64, float_value INT64, double_value INT64, set_timestamp_micros INT64>>> |
+| 5 | user_properties.value.float_value | FLOAT64 |
+| 6 | user_properties.value.double_value | FLOAT64 |
+| 7 | user_properties.value | STRUCT<string_value STRING, int_value INT64, float_value FLOAT64, double_value FLOAT64, set_timestamp_micros INT64> |
+| 8 | user_properties.key | STRING |
+| 9 | user_properties | ARRAY<STRUCT<key STRING, value STRUCT<string_value STRING, int_value INT64, float_value FLOAT64, double_value FLOAT64, set_timestamp_micros INT64>>> |
 | 10 | user_ltv.revenue | FLOAT64 |
 | 11 | user_ltv.currency | STRING |
 | 12 | user_ltv | STRUCT<revenue FLOAT64, currency STRING> |
@@ -221,11 +237,11 @@ All events with that combination belong to the same session window (subject to G
 | 16 | traffic_source.name | STRING |
 | 17 | traffic_source.medium | STRING |
 | 18 | traffic_source | STRUCT<medium STRING, name STRING, source STRING> |
-| 19 | stream_id | INT64 |
+| 19 | stream_id | STRING |
 | 20 | privacy_info.uses_transient_token | STRING |
-| 21 | privacy_info.analytics_storage | INT64 |
-| 22 | privacy_info.ads_storage | INT64 |
-| 23 | privacy_info | STRUCT<analytics_storage INT64, ads_storage INT64, uses_transient_token STRING> |
+| 21 | privacy_info.analytics_storage | STRING |
+| 22 | privacy_info.ads_storage | STRING |
+| 23 | privacy_info | STRUCT<analytics_storage STRING, ads_storage STRING, uses_transient_token STRING> |
 | 24 | platform | STRING |
 | 25 | items.quantity | INT64 |
 | 26 | items.promotion_name | STRING |
@@ -249,24 +265,23 @@ All events with that combination belong to the same session window (subject to G
 | 86 | ecommerce | STRUCT<total_item_quantity INT64, purchase_revenue_in_usd FLOAT64, purchase_revenue FLOAT64, refund_value_in_usd FLOAT64, refund_value FLOAT64, shipping_value_in_usd FLOAT64, shipping_value FLOAT64, tax_value_in_usd FLOAT64, tax_value FLOAT64, unique_items INT64, transaction_id STRING> |
 | 87 | device.web_info.browser_version | STRING |
 | 88 | device.web_info.browser | STRING |
-| 89 | device.web_info | STRUCT<browser STRING, browser_version STRING> |
-| 90 | device.vendor_id | INT64 |
+| 89 | device.web_info | STRUCT<browser STRING, browser_version STRING, hostname STRING> |
+| 90 | device.vendor_id | STRING |
 | 91 | device.time_zone_offset_seconds | INT64 |
 | 92 | device.operating_system_version | STRING |
 | 93 | device.operating_system | STRING |
-| 94 | device.mobile_os_hardware_model | INT64 |
+| 94 | device.mobile_os_hardware_model | STRING |
 | 95 | device.mobile_model_name | STRING |
 | 96 | device.mobile_marketing_name | STRING |
 | 97 | device.mobile_brand_name | STRING |
 | 98 | device.language | STRING |
-| 99 | device.is_limited_ad_tracking | STRING |
+| 99 | device.is_limited_ad_tracking | BOOL |
 | 100 | device.category | STRING |
-| 101 | device.advertising_id | INT64 |
-| 102 | device | STRUCT<category STRING, mobile_brand_name STRING, mobile_model_name STRING, mobile_marketing_name STRING, mobile_os_hardware_model INT64, operating_system STRING, operating_system_version STRING, vendor_id INT64, advertising_id INT64, language STRING, is_limited_ad_tracking STRING, time_zone_offset_seconds INT64, web_info STRUCT<browser STRING, browser_version STRING>> |
+| 101 | device.advertising_id | STRING |
+| 102 | device | STRUCT<category STRING, mobile_brand_name STRING, mobile_model_name STRING, mobile_marketing_name STRING, mobile_os_hardware_model STRING, operating_system STRING, operating_system_version STRING, vendor_id STRING, advertising_id STRING, language STRING, is_limited_ad_tracking BOOL, time_zone_offset_seconds INT64, web_info STRUCT<browser STRING, browser_version STRING, hostname STRING>> |
 | 103 | app_info.version | STRING |
 | 104 | app_info.install_store | STRING |
 | 105 | app_info.install_source | STRING |
 | 106 | app_info.id | STRING |
 | 107 | app_info.firebase_app_id | STRING |
 | 108 | app_info | STRUCT<id STRING, version STRING, install_store STRING, firebase_app_id STRING, install_source STRING> |
-```
